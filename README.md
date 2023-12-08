@@ -1,2 +1,2 @@
-# Transaction Analyzer
-Simple transaction analyzer web app
+# Statements Analyzer
+Simple statement analyzer web app
