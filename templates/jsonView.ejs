@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON View</title>
+</head>
+<body>
+  <h1>JSON Data:</h1>
+  <% jsonData.forEach(function(obj) { %>
+    <pre><%= JSON.stringify(obj, null, 2) %></pre>
+  <% }); %>
+</body>
+</html>
