@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Input Form</title>
+</head>
+
+<body>
+	<h1>Add A New Statement</h1>
+  <form id = 'app' action='http://localhost:3000/validationForm' method="post" enctype="multipart/form-data">
+    <fieldset>
+			<label>Whats your email address? <input type="email" name="email" placeholder="example@notreal.com"></label>
+    </fieldset>
+    <br>
+    <input type = "reset" value = "Reset">
+    <input type = "submit" value = "Submit" onclick="check(); return false;">
+  </form>
+  
+	<hr>
+  <a href = "/"><u>HOME</u></a>
+</body>
+
+<script>
+  const check = () => {
+    let res = confirm('Are you sure you want to submit your statement?');
+    if (res) {
+      document.getElementById('app').submit();
+    }
+  }
+</script>
+
+</html>

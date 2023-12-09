@@ -1,5 +1,4 @@
-import MonthlyAnalysis from './MonthlyAnalysis';
-
+const MonthlyAnalysis = require('./MonthlyAnalysis');
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -20,11 +19,6 @@ app.use(fileUpload());
 app.listen(3000);
 console.log(`Web server started and running at http://localhost:3000`);
 
-//create array where each index is a month and holds a MonthlyAnalusis Object
-const analysisArray = new Array(12);
-for (let i = 0; i < analysisArray.length; i++) {
-  analysisArray[i] = new MonthlyAnalysis(i);
-}
 
 //define middleware
 const csvToJson =  (req,res,next) => {
@@ -49,6 +43,7 @@ const csvToJson =  (req,res,next) => {
   var callback = function(error, data, response) {
     if (error) {
       console.error(error);
+      return res.status(400).send('Error converting CSVs through Cloudmersive API.');
     } else {
       console.log('API called successfully. Returned data: ' + data);
       req.json = data;
@@ -58,20 +53,57 @@ const csvToJson =  (req,res,next) => {
   apiInstance.convertDataCsvToJson(inputFile, opts, callback);
 }
 
+const getUserData = async (req, res, next) => {
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+  try {
+      await client.connect();
+      let filter = {
+        email : req.body.email,
+      }
+      const result = await client.db(databaseAndCollection.db)
+                        .collection(databaseAndCollection.collection)
+                        .findOne(filter);
+      req.monthlyAnalysisData = null;
+      if (result) {
+          req.monthlyAnalysisData = result.monthlyAnalysisData;
+      }
+  } catch (e) {
+      console.error(e);
+      return res.status(500).send('Internal Server Error');
+  } finally {
+      await client.close();
+  }
+  next();
+}
+
 const parseJson = (req,res,next) => {
   data = req.json;
+  prevUserData = req.monthlyAnalysisData;
 
+  let analysisArray;
+  if (prevUserData != null) {
+    analysisArray = prevUserData.map(json => MonthlyAnalysis.fromJSON(json));
+  } else {
+    console.log("case 2");
+    analysisArray = new Array(12);
+    for (let i = 0; i < analysisArray.length; i++) {
+      analysisArray[i] = new MonthlyAnalysis(i);
+    }
+  }
+  
+  console.log(analysisArray);
   data.forEach((transaction) => {
-    let month = transaction["Posted Date"].substring(0,2);
+    let monthIndex = Number(transaction["Posted Date"].substring(0,2))-1;
     let merchant = transaction["Payee"];
     //JSON data comes in as "-64.99" for purchases. Want to turn this into 64.99 and vice versa for deposits.
     let amount = Number(transaction.Amount) * -1; 
-    let analysisObj = analysisArray[MonthlyAnalysis.getMonthIndexByString(transaction)];
+    let analysisObj = analysisArray[monthIndex];
 
     analysisObj.updateTotalSpending(amount);
     analysisObj.addMerchantSpending(merchant,amount);
   });
 
+  req.monthlyAnalysisData = analysisArray.map(analysis => analysis.toJSON());
   next();
 }
 
@@ -79,22 +111,26 @@ const storeJson = async (req,res,next) => {
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
   try {
       await client.connect();
-      let statement = {
-        name : req.body.name,
+      let userData = {
         email : req.body.email,
-        gpa : req.body.gpa,
-        backgroundInfo : req.body.backgroundInfo,
-        time : new Date().toString(),
+        monthlyAnalysisData : req.monthlyAnalysisData,
       }
-      req.application = application;
-      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(application);
+      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(userData);
   } catch (e) {
       console.error(e);
-      res.send('Error updataing database');
+      res.status(500).send('Error updating database');
   } finally {
       await client.close();
   }
   next();
+}
+
+const parseUserData = (req, res, next) => {
+  if (req.monthlyAnalysisData === null) {
+    res.status(500).send('No Data Found');
+  }
+  
+  analysisArray = prevUserData.map(json => MonthlyAnalysis.fromJSON(json));
 }
 
 //define express routes
@@ -106,10 +142,17 @@ app.get('/inputForm', (req, res) => {
   res.render('inputForm');
 });
 
-app.post('/inputForm', csvToJson, parseJson, storeJson, (req,res) => {
-  console.log(req.json);
-  res.render('jsonView', { jsonData: req.json });
+app.get('/validation', (req, res) => {
+  res.render('validationForm');
+});
+
+app.post('/inputForm', csvToJson, getUserData, parseJson, storeJson, (req,res) => {
+  res.render('confirmation', { email: req.body.email });
 })
+
+app.post('/validation',  getUserData, parseUserData, (req,res) => {
+
+});
 
 //listen for stop
 process.stdout.write('Stop to shutdown the server: ');

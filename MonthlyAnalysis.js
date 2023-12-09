@@ -6,7 +6,6 @@
  */
 class MonthlyAnalysis {
   #month;
-  #monthIndex; 
   #merchantMap;
   #totalSpending;
 
@@ -14,20 +13,11 @@ class MonthlyAnalysis {
    * Create a new MonthlyAnalysis instance.
    * 
    * @constructor
-   * @param {string|number} month - The month of the analysis (as a string or index).
+   * @param {number} month - The month of the analysis.
    * @throws {Error} Throws an error for invalid argument types.
    */
   constructor(month) {
-    if (typeof month === 'string') {
-      this.#month = month;
-      this.#monthIndex = MonthlyAnalysis.getMonthIndexByString(month);
-    } else if (typeof month === 'number') {
-      this.#month = MonthlyAnalysis.getMonthStringByIndex(month);
-      this.#monthIndex = month;
-    } else {
-      console.error('Invalid argument type');
-    }
-    t
+    this.#month = month;
     this.#merchantMap = new Map();
     this.#totalSpending = 0;
   }
@@ -38,6 +28,18 @@ class MonthlyAnalysis {
 
   get totalSpending() {
     return this.#totalSpending;
+  }
+
+   setMonth(month) {
+    this.#month = month;
+  }
+
+  setMerchantMap(merchantMap) {
+    this.#merchantMap = merchantMap;
+  }
+
+  setTotalSpending(totalSpending) {
+    this.#totalSpending = totalSpending;
   }
 
   updateTotalSpending(amount) {
@@ -106,27 +108,35 @@ class MonthlyAnalysis {
     return maxMerchant;
   }
 
-  // Static method to get the month index from string
-  static getMonthIndexByString(month) {
-    const months = [
-      "January", "February", "March", "April",
-      "May", "June", "July", "August",
-      "September", "October", "November", "December"
-    ];
-    return months.indexOf(month);
+  /**
+   * Convert the MonthlyAnalysis instance to a JSON representation.
+   * 
+   * @returns {Object} The JSON representation of the MonthlyAnalysis.
+   */
+  toJSON() {
+    return {
+      month: this.#month,
+      merchantMap: Array.from(this.#merchantMap.entries()),
+      totalSpending: this.#totalSpending
+    };
   }
 
-  // Static method to get string by index
-  static getMonthStringByIndex(index) {
-    const months = [
-      "January", "February", "March", "April",
-      "May", "June", "July", "August",
-      "September", "October", "November", "December"
-    ];
-    return months[index];
+  /**
+   * Create a MonthlyAnalysis instance from a JSON representation.
+   * 
+   * @static
+   * @param {Object} json - The JSON representation of the MonthlyAnalysis.
+   * @returns {MonthlyAnalysis} The MonthlyAnalysis instance created from the JSON.
+   */
+  static fromJSON(json) {
+    const { month, totalSpending, merchantMap} = json;
+    const analysis = new MonthlyAnalysis(month);
+    
+    analysis.#month = month;
+    analysis.#totalSpending = totalSpending;
+    analysis.#merchantMap = new Map(merchantMap);
+
+    return analysis;
   }
-
-
 }
-
-export default MonthlyAnalysis;
+module.exports = MonthlyAnalysis;
