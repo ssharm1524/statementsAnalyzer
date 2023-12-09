@@ -1,3 +1,5 @@
+import MonthlyAnalysis from './MonthlyAnalysis';
+
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -17,6 +19,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
 app.listen(3000);
 console.log(`Web server started and running at http://localhost:3000`);
+
+//create array where each index is a month and holds a MonthlyAnalusis Object
+const analysisArray = new Array(12);
+for (let i = 0; i < analysisArray.length; i++) {
+  analysisArray[i] = new MonthlyAnalysis(i);
+}
 
 //define middleware
 const csvToJson =  (req,res,next) => {
@@ -53,76 +61,40 @@ const csvToJson =  (req,res,next) => {
 const parseJson = (req,res,next) => {
   data = req.json;
 
-  class Transaction {
-    #date;
-    #id;
-    #merchant;
-    #location;
-    #amount;
-    static max;
-  
-    constructor(date, id, merchant, location, amount) {
-      this.#date = date;
-      this.#id = id;
-      this.#merchant = merchant;
-      this.#location = location;
-      this.#amount = amount;
-      Transaction.max
-    }
-  
-    // Getter and setter for 'date'
-    get date() {
-      return this.#date;
-    }
-  
-    set date(newDate) {
-      this.#date = newDate;
-    }
-  
-    // Getter and setter for 'id'
-    get id() {
-      return this.#id;
-    }
-  
-    set id(newId) {
-      this.#id = newId;
-    }
-  
-    // Getter and setter for 'merchant'
-    get merchant() {
-      return this.#merchant;
-    }
-  
-    set merchant(newMerchant) {
-      this.#merchant = newMerchant;
-    }
-  
-    // Getter and setter for 'location'
-    get location() {
-      return this.#location;
-    }
-  
-    set location(newLocation) {
-      this.#location = newLocation;
-    }
-  
-    // Getter and setter for 'amount'
-    get amount() {
-      return this.#amount;
-    }
-  
-    set amount(newAmount) {
-      this.#amount = newAmount;
-    }
-  }
-
-  //map of store -> amount
-  //max heap to store largest transaction
-  //bst to store by transaction amount
   data.forEach((transaction) => {
-    temp = new Transaction(transaction["Posted Date"], transaction["Reference Number"], transaction.Payee, transaction.Address, transaction.Amount);
+    let month = transaction["Posted Date"].substring(0,2);
+    let merchant = transaction["Payee"];
+    //JSON data comes in as "-64.99" for purchases. Want to turn this into 64.99 and vice versa for deposits.
+    let amount = Number(transaction.Amount) * -1; 
+    let analysisObj = analysisArray[MonthlyAnalysis.getMonthIndexByString(transaction)];
 
+    analysisObj.updateTotalSpending(amount);
+    analysisObj.addMerchantSpending(merchant,amount);
   });
+
+  next();
+}
+
+const storeJson = async (req,res,next) => {
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+  try {
+      await client.connect();
+      let statement = {
+        name : req.body.name,
+        email : req.body.email,
+        gpa : req.body.gpa,
+        backgroundInfo : req.body.backgroundInfo,
+        time : new Date().toString(),
+      }
+      req.application = application;
+      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(application);
+  } catch (e) {
+      console.error(e);
+      res.send('Error updataing database');
+  } finally {
+      await client.close();
+  }
+  next();
 }
 
 //define express routes
@@ -134,7 +106,7 @@ app.get('/inputForm', (req, res) => {
   res.render('inputForm');
 });
 
-app.post('/inputForm', csvToJson, parseJson, (req,res) => {
+app.post('/inputForm', csvToJson, parseJson, storeJson, (req,res) => {
   console.log(req.json);
   res.render('jsonView', { jsonData: req.json });
 })
