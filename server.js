@@ -261,6 +261,11 @@ app.get('/yearlyInsights', getUserData, parseYearlyInsights, (req,res) => {
   res.render('yearlyInsights', req.userInsights);
 });
 
+//for hosting purposes
+app.get('/healthz', (req,res) => {
+  res.status(200).send("All good");
+})
+
 //listen for stop
 process.stdout.write('Stop to shutdown the server: ');
 process.stdin.on("readable", function () {
