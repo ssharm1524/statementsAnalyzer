@@ -16,10 +16,12 @@
     </p>
 
     <div class="insight-details">
-      <p>Total Spending: $<%= totalAmount.toFixed(2) %></p>
-      <p>Most Money Spent at: <%= merchantBySpending %>. You spent $<%= spendingAmount.totalAmount %> here across <%= spendingAmount.count %> purchase(s).</p>
-      <p>Most Frequent Merchant: <%= merchantByFreq %>. You spent $<%= freqAmount.totalAmount %> here across <%= freqAmount.count %> purchase(s).</p>
+      <p><strong>Total Spending This Year:</strong> $<%= totalAmount.toFixed(2) %></p>
+      <p><strong>Most Money Spent at:</strong> <%= merchantBySpending %>. You spent $<%= spendingAmount.totalAmount.toFixed(2) %> here across <%= spendingAmount.count %> purchase(s).</p>
+      <p><strong>Most Frequent Merchant:</strong> <%= merchantByFreq %>. You spent $<%= freqAmount.totalAmount.toFixed(2) %> here across <%= freqAmount.count %> purchase(s).</p>
     </div>
+
+    <%- htmlTable %>
 
     <br>
     Thank You For Using Our Site!

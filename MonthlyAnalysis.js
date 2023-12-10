@@ -152,7 +152,7 @@ class MonthlyAnalysis {
 
     return analysis;
   }
-  
+
   static combineMerchantMaps(current, newData) {
     if (!newData || newData.size === 0) {
       return;
@@ -161,7 +161,8 @@ class MonthlyAnalysis {
     newData.forEach(({ count, totalAmount }, merchant) => {
       if (current.has(merchant)) {
         // If the current map already has the merchant, update the values
-        const { currentCount, currentTotal } = current.get(merchant);
+        let currentCount = current.get(merchant).count;
+        let currentTotal = current.get(merchant).totalAmount;
         current.set(merchant, { count: currentCount + count, totalAmount: currentTotal + totalAmount });
       } else {
         // If the current map does not have the merchant, add a new entry

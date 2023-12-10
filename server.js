@@ -89,7 +89,6 @@ const parseJson = (req,res,next) => {
   if (prevUserData != null) {
     analysisArray = prevUserData.map(json => MonthlyAnalysis.fromJSON(json));
   } else {
-    console.log("case 2");
     analysisArray = new Array(12);
     for (let i = 0; i < analysisArray.length; i++) {
       analysisArray[i] = new MonthlyAnalysis(i);
@@ -150,13 +149,20 @@ const parseMonthlyInsights = (req, res, next) => {
   let merchantByFreq = analysisObj.getMerchantByHighestFreq();
   let freqAmount = analysisObj.getMerchantSpending(merchantByFreq);
 
+  let htmlTable = "<table border = '1'><tr><th>Merchant</th><th>Number of Transactions</th><th>Total Amount</th></tr>";
+  analysisObj.merchantMap.forEach(({count, totalAmount}, merchant) => {
+    htmlTable += `<tr><td>${merchant}</td><td>${count}</td><td>$${totalAmount.toFixed(2)}</td></tr>`;
+  });
+  htmlTable += '</table>';
+
   req.userInsights = {
     month : req.query.month,
     totalAmount : analysisObj.totalSpending,
     merchantBySpending : merchantBySpending,
     spendingAmount : spendingAmount,
     merchantByFreq : merchantByFreq,
-    freqAmount : freqAmount
+    freqAmount : freqAmount,
+    htmlTable : htmlTable
   }
 
   next();
@@ -198,12 +204,19 @@ const parseYearlyInsights = (req, res, next) => {
   let spendingAmount = yearObj.yearMap.get(maxMerchantBySpending);
   let freqAmount = yearObj.yearMap.get(maxMerchantByFreq);
 
+  let htmlTable = "<table border = '1'><tr><th>Merchant</th><th>Number of Transactions</th><th>Total Amount</th></tr>";
+  yearObj.yearMap.forEach(({count, totalAmount}, merchant) => {
+    htmlTable += `<tr><td>${merchant}</td><td>${count}</td><td>$${totalAmount.toFixed(2)}</td></tr>`;
+  });
+  htmlTable += '</table>';
+
   req.userInsights = {
     totalAmount : yearObj.totalSpending,
     merchantBySpending : maxMerchantBySpending,
     merchantByFreq : maxMerchantByFreq,
     spendingAmount : spendingAmount,
-    freqAmount : freqAmount
+    freqAmount : freqAmount,
+    htmlTable : htmlTable
   }
 
   next();
