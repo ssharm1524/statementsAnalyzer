@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('templates'));
 app.use(fileUpload());
-app.listen(3000);
+app.listen(8080);
 console.log(`Web server started and running at http://localhost:3000`);
 
 
