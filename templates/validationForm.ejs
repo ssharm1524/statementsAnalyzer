@@ -7,8 +7,8 @@
 </head>
 
 <body>
-	<h1>Add A New Statement</h1>
-  <form id = 'app' action='http://localhost:3000/validationForm' method="post" enctype="multipart/form-data">
+	<h1>Login to View Insights</h1>
+  <form id = 'app' action='http://localhost:3000/validation' method="post" enctype="multipart/form-data">
     <fieldset>
 			<label>Whats your email address? <input type="email" name="email" placeholder="example@notreal.com"></label>
     </fieldset>
@@ -23,7 +23,7 @@
 
 <script>
   const check = () => {
-    let res = confirm('Are you sure you want to submit your statement?');
+    let res = confirm('Submit Email?');
     if (res) {
       document.getElementById('app').submit();
     }

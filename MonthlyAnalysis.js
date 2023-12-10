@@ -30,7 +30,7 @@ class MonthlyAnalysis {
     return this.#totalSpending;
   }
 
-   setMonth(month) {
+  setMonth(month) {
     this.#month = month;
   }
 
@@ -80,6 +80,10 @@ class MonthlyAnalysis {
     return Array.from(this.#merchantMap.entries());
   }
 
+  get merchantMap() {
+    return this.#merchantMap;
+  }
+
   getMerchantByHighestSpent() {
     let maxAmount = 0;
     let maxMerchant = null;
@@ -106,6 +110,16 @@ class MonthlyAnalysis {
     });
 
     return maxMerchant;
+  }
+
+  // Static method to get the month index from string
+  static getMonthIndexByString(month) {
+    const months = [
+      "January", "February", "March", "April",
+      "May", "June", "July", "August",
+      "September", "October", "November", "December"
+    ];
+    return months.indexOf(month);
   }
 
   /**
@@ -137,6 +151,23 @@ class MonthlyAnalysis {
     analysis.#merchantMap = new Map(merchantMap);
 
     return analysis;
+  }
+  
+  static combineMerchantMaps(current, newData) {
+    if (!newData || newData.size === 0) {
+      return;
+    }
+  
+    newData.forEach(({ count, totalAmount }, merchant) => {
+      if (current.has(merchant)) {
+        // If the current map already has the merchant, update the values
+        const { currentCount, currentTotal } = current.get(merchant);
+        current.set(merchant, { count: currentCount + count, totalAmount: currentTotal + totalAmount });
+      } else {
+        // If the current map does not have the merchant, add a new entry
+        current.set(merchant, { count, totalAmount });
+      }
+    });
   }
 }
 module.exports = MonthlyAnalysis;

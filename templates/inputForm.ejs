@@ -10,17 +10,16 @@
 	<h1>Add A New Statement</h1>
   <form id = 'app' action='http://localhost:3000/inputForm' method="post" enctype="multipart/form-data">
     <fieldset>
-      <label>Give your statement a name: <input type="text" name="name" placeholder="Ex: M&T Bank November Statement" required/></label>
-			<label>Whats your email address? (so we can email you a copy of your insights): <input type="email" name="email"  placeholder="example@notreal.com"></label>
+			<label>Whats your email address?: <input type="email" name="email"  placeholder="example@notreal.com" required></label>
       <br>
       <br>
-      <label>Add your statement. Excel files are the only supported format at this time: <input type="file" name="statement"/></label>
+      <label>Add your statement. Bank of America CSV files are the only supported format at this time: <input type="file" name="statement"/></label>
       <br>
       <br>
     </fieldset>
     <br>
     <input type = "reset" value = "Reset">
-    <input type = "submit" value = "Submit Application" onclick="check(); return false;">
+    <input type = "submit" value = "Submit Statement" onclick="check(); return false;">
   </form>
   
 	<hr>

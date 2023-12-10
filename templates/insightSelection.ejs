@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Insight Selection</title>
+</head>
+
+<body>
+	<h1>Login and Select how you would like to view your insights</h1>
+
+  <form id = "myForm" action="/insightSelection" method="post">
+    <label>Whats your email address? <input type="email" name="email" placeholder="example@notreal.com"></label>
+
+    <br>
+
+    <label for="month">Select Month (Only if you are choosing "By Month"):</label>
+    <select id="month" name="month">
+      <option value="January">January</option>
+      <option value="February">February</option>
+      <option value="March">March</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+      <option value="November">November</option>
+      <option value="December">December</option>
+    </select>
+
+    <br>
+
+    <!-- Monthly Button -->
+    <button type="submit" name="choice" value="month">By Month</button>
+
+    <!-- Yearly Button -->
+    <button type="submit" name="choice" value="year">Whole Year</button>
+  </form>
+
+  <hr>
+  <a href = "/"><u>HOME</u></a>
+</body>
+
+
+</html>

@@ -15,6 +15,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 app.set("views", path.resolve(__dirname, "templates"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(fileUpload());
 app.listen(3000);
 console.log(`Web server started and running at http://localhost:3000`);
@@ -45,7 +46,7 @@ const csvToJson =  (req,res,next) => {
       console.error(error);
       return res.status(400).send('Error converting CSVs through Cloudmersive API.');
     } else {
-      console.log('API called successfully. Returned data: ' + data);
+      console.log('API called successfully.');
       req.json = data;
       next();
     }
@@ -54,11 +55,14 @@ const csvToJson =  (req,res,next) => {
 }
 
 const getUserData = async (req, res, next) => {
+   if (!req.body.email && !req.query.email) {
+    res.status(500).send('No Email Given');
+   }
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
   try {
       await client.connect();
       let filter = {
-        email : req.body.email,
+        email : req.body.email ?? req.query.email,
       }
       const result = await client.db(databaseAndCollection.db)
                         .collection(databaseAndCollection.collection)
@@ -91,7 +95,6 @@ const parseJson = (req,res,next) => {
     }
   }
   
-  console.log(analysisArray);
   data.forEach((transaction) => {
     let monthIndex = Number(transaction["Posted Date"].substring(0,2))-1;
     let merchant = transaction["Payee"];
@@ -107,30 +110,90 @@ const parseJson = (req,res,next) => {
   next();
 }
 
-const storeJson = async (req,res,next) => {
+const storeJson = async (req, res, next) => {
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
   try {
-      await client.connect();
-      let userData = {
-        email : req.body.email,
-        monthlyAnalysisData : req.monthlyAnalysisData,
-      }
-      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(userData);
+    await client.connect();
+    const filter = { email: req.body.email };
+    const userData = {
+      email: req.body.email,
+      monthlyAnalysisData: req.monthlyAnalysisData,
+    };
+    const options = { upsert: true }; // Set upsert option to true to insert if not found, update otherwise
+    const result = await client.db(databaseAndCollection.db)
+      .collection(databaseAndCollection.collection)
+      .updateOne(filter, { $set: userData }, options);
   } catch (e) {
-      console.error(e);
-      res.status(500).send('Error updating database');
+    console.error(e);
+    res.status(500).send('Error updating database');
   } finally {
-      await client.close();
+    await client.close();
   }
+  next();
+};
+
+const parseMonthlyInsights = (req, res, next) => {
+  if (req.query.month == null) {
+    res.status(500).send('No month recieved with month choice.');
+  }
+
+  if (req.monthlyAnalysisData == null) {
+    res.status(500).send('No userData receieved.');
+  }
+
+  let analysisArray = req.monthlyAnalysisData.map(json => MonthlyAnalysis.fromJSON(json));
+  let analysisObj = analysisArray[MonthlyAnalysis.getMonthIndexByString(req.query.month)];
+
+  req.userInsights = {
+    month : req.body.month,
+    totalAmount : analysisObj.totalSpending,
+    merchantBySpending : analysisObj.getMerchantByHighestSpent(),
+    merhcantByFreq : analysisObj.getMerchantByHighestFreq()
+  }
+
   next();
 }
 
-const parseUserData = (req, res, next) => {
-  if (req.monthlyAnalysisData === null) {
-    res.status(500).send('No Data Found');
+const parseYearlyInsights = (req, res, next) => {
+  if (req.monthlyAnalysisData == null) {
+    res.status(500).send('No userData receieved.');
   }
-  
-  analysisArray = prevUserData.map(json => MonthlyAnalysis.fromJSON(json));
+
+  let analysisArray = req.monthlyAnalysisData.map(json => MonthlyAnalysis.fromJSON(json));
+
+
+  let yearObj = analysisArray.reduce((acculmulator, currAnalysisObj) => {
+    acculmulator.totalSpending += currAnalysisObj.totalSpending;
+    MonthlyAnalysis.combineMerchantMaps(acculmulator.yearMap, currAnalysisObj.merchantMap);
+    return acculmulator;
+  }, {
+    totalSpending : 0,
+    yearMap : new Map(),
+  });
+
+  let maxAmount = 0;
+  let maxCount = 0;
+  let maxMerchantBySpending = null;
+  let maxMerchantByFreq = null;
+
+  yearObj.yearMap.forEach((data, merchant) => {
+    if (data.totalAmount > maxAmount) {
+      maxAmount = data.totalAmount;
+      maxMerchantBySpending = merchant;
+    }
+    if (data.count > maxCount) {
+      maxCount = data.count;
+      maxMerchantByFreq = merchant;
+    }
+  });
+
+  req.userInsights = {
+    totalAmount : yearObj.totalSpending,
+    merchantBySpending : maxMerchantBySpending,
+    merchantByFreq : maxMerchantByFreq,
+  }
+
+  next();
 }
 
 //define express routes
@@ -142,16 +205,34 @@ app.get('/inputForm', (req, res) => {
   res.render('inputForm');
 });
 
-app.get('/validation', (req, res) => {
-  res.render('validationForm');
-});
-
 app.post('/inputForm', csvToJson, getUserData, parseJson, storeJson, (req,res) => {
   res.render('confirmation', { email: req.body.email });
 })
 
-app.post('/validation',  getUserData, parseUserData, (req,res) => {
+app.get('/insightSelection', (req,res) => {
+  res.render('insightSelection')
+});
 
+app.post('/insightSelection', (req,res) => {
+  if (!req.body.choice || !req.body.email) {
+    res.status(500).send(`Internal Server Error. No email Given.`);
+  }
+
+  if (req.body.choice === 'month') {
+    res.redirect(`/monthlyInsights?email=${req.body.email}&month=${req.body.month}`);
+  } else if (req.body.choice === 'year') {
+    res.redirect(`/yearlyInsights?email=${req.body.email}`);
+  } else {
+    res.status(500).send('Internal Server Error. Did not recieve correct choice.');
+  }
+});
+
+app.get('/monthlyInsights', getUserData, parseMonthlyInsights, (req,res) => {
+  res.render('monthlyInsights', req.userInsights);
+});
+
+app.get('/yearlyInsights', getUserData, parseYearlyInsights, (req,res) => {
+  res.render('yearlyInsights', req.userInsights);
 });
 
 //listen for stop
