@@ -195,8 +195,8 @@ const parseYearlyInsights = (req, res, next) => {
     }
   });
 
-  let spendingAmount = analysisObj.getMerchantSpending(maxMerchantBySpending);
-  let freqAmount = analysisObj.getMerchantSpending(maxMerchantByFreq);
+  let spendingAmount = yearObj.yearMap.get(maxMerchantBySpending);
+  let freqAmount = yearObj.yearMap.get(maxMerchantByFreq);
 
   req.userInsights = {
     totalAmount : yearObj.totalSpending,
