@@ -4,26 +4,29 @@
 <head>
   <meta charset="utf-8" />
   <title>Monthly Insights</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
-  <h1><%= month %> Insights</h1>
+  <div class="container">
+    <h1><%= month %> Insights</h1>
 
-  <p>
-    Welcome. Here are your insights for the month of <%= month %>.
-  </p>
+    <p>
+      Welcome. Here are your insights for the month of <%= month %>.
+    </p>
 
-  You spent a total of: <%= totalAmount %>
-  <br>
-  You spent the most money at this merchant: <%= merchantBySpending %>
-  <br>
-  You most frequently shopped with this merchant: <%= merhcantByFreq %>
-  <br>
+    <div class="insight-details">
+      <p>Total Spending: $<%= totalAmount.toFixed(2) %></p>
+      <p>Most Money Spent at: <%= merchantBySpending %>. You spent $<%= spendingAmount.totalAmount %> here across <%= spendingAmount.count %> purchase(s).</p>
+      <p>Most Frequent Merchant: <%= merchantByFreq %>. You spent $<%= freqAmount.totalAmount %> here across <%= freqAmount.count %> purchase(s).</p>
+    </div>
 
-  Thank You For Using Our Site!
+    <br>
+    Thank You For Using Our Site!
 
-  <hr>
-  <a href="/"><u>HOME</u></a>
+    <hr>
+    <a href="/"><u>HOME</u></a>
+  </div>
 </body>
 
 </html>

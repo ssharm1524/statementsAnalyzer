@@ -16,6 +16,7 @@ app.set("views", path.resolve(__dirname, "templates"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(express.static('templates'));
 app.use(fileUpload());
 app.listen(3000);
 console.log(`Web server started and running at http://localhost:3000`);
@@ -144,11 +145,18 @@ const parseMonthlyInsights = (req, res, next) => {
   let analysisArray = req.monthlyAnalysisData.map(json => MonthlyAnalysis.fromJSON(json));
   let analysisObj = analysisArray[MonthlyAnalysis.getMonthIndexByString(req.query.month)];
 
+  let merchantBySpending = analysisObj.getMerchantByHighestSpent();
+  let spendingAmount = analysisObj.getMerchantSpending(merchantBySpending);
+  let merchantByFreq = analysisObj.getMerchantByHighestFreq();
+  let freqAmount = analysisObj.getMerchantSpending(merchantByFreq);
+
   req.userInsights = {
-    month : req.body.month,
+    month : req.query.month,
     totalAmount : analysisObj.totalSpending,
-    merchantBySpending : analysisObj.getMerchantByHighestSpent(),
-    merhcantByFreq : analysisObj.getMerchantByHighestFreq()
+    merchantBySpending : merchantBySpending,
+    spendingAmount : spendingAmount,
+    merchantByFreq : merchantByFreq,
+    freqAmount : freqAmount
   }
 
   next();
@@ -187,10 +195,15 @@ const parseYearlyInsights = (req, res, next) => {
     }
   });
 
+  let spendingAmount = analysisObj.getMerchantSpending(maxMerchantBySpending);
+  let freqAmount = analysisObj.getMerchantSpending(maxMerchantByFreq);
+
   req.userInsights = {
     totalAmount : yearObj.totalSpending,
     merchantBySpending : maxMerchantBySpending,
     merchantByFreq : maxMerchantByFreq,
+    spendingAmount : spendingAmount,
+    freqAmount : freqAmount
   }
 
   next();

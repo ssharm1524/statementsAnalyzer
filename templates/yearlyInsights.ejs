@@ -2,30 +2,31 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <title>Yearly Insights</title>
+  <meta charset="utf-8" />
+  <title>Yearly Insights</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
-    <h1>Year Insights</h1>
+  <div class="container">
+    <h1>Yearly Insights</h1>
 
     <p>
-        Here are your insights for the year:
+      Here are your insights for the year:
     </p>
 
-    You spent a total of: <%= totalAmount %>
-    <br>
-    You spent the most money at this merchant: <%= merchantBySpending %>
-    <br>
-    You most frequently shopped with this merchant: <%= merchantByFreq %>
-    <br>
-
+    <div class="insight-details">
+      <p>Total Spending: $<%= totalAmount.toFixed(2) %></p>
+      <p>Most Money Spent at: <%= merchantBySpending %>. You spent $<%= spendingAmount.totalAmount %> here across <%= spendingAmount.count %> purchase(s).</p>
+      <p>Most Frequent Merchant: <%= merchantByFreq %>. You spent $<%= freqAmount.totalAmount %> here across <%= freqAmount.count %> purchase(s).</p>
+    </div>
 
     <br>
     Thank You For Using Our Site!
 
     <hr>
     <a href="/"><u>HOME</u></a>
+  </div>
 </body>
 
 </html>

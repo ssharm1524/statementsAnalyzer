@@ -2,17 +2,18 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8" />
-	<title>Confirmation Page</title>
+  <meta charset="utf-8" />
+  <title>Confirmation Page</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
-	<h1>Your statement has been stored and processed under the following email:</h1>
-
-  <%= email %>
-
-  <hr>
-  <a href = "/"><u>HOME</u></a>
+  <div class="container">
+    <h1>Your statement has been stored and processed under the following email:</h1>
+    <%= email %>
+    <hr>
+    <a href="/"><u>HOME</u></a>
+  </div>
 </body>
 
 </html>

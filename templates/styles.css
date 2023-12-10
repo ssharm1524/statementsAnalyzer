@@ -1,0 +1,96 @@
+body {
+  font-family: 'Arial', sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ac9789;
+  color: #343a40;
+}
+
+.container {
+  width: 50%;
+  margin:0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ac9789;
+  text-align: center;
+}
+
+.action-btns {
+  display: inline;
+}
+
+h1 {
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+  color: #687418;
+}
+
+a:hover {
+  text-decoration:wavy;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  margin-top: 15px;
+  box-sizing: border-box;
+  border: 1px solid #c4c0bf;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #687418;
+  color: #c4c0bf;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+input[type=submit], 
+input[type=reset]
+{
+  background-color: #687418;
+  color: #c4c0bf;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+input[type=submit]:hover, input[type=reset]:hover {
+  background-color: #ac9789;
+}
+
+button:hover {
+  background-color: #ac9789;
+}
+
+hr {
+  margin: 30px 0;
+  width: 100%;
+  border: 1px solid #000;
+}
+
+p {
+  margin-bottom: 30px;
+  text-align: center;
+}

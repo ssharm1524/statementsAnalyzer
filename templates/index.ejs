@@ -2,24 +2,27 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8" />
-	<title>Statements Analyzer</title>
+  <meta charset="utf-8" />
+  <title>Statements Analyzer</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
-	<h1>Statements Analyzer</h1>
+  <div class="container">
+    <h1>Statements Analyzer</h1>
+    <p>
+      Welcome. This simple web app allows you to upload your statements in the form of a CSV file and view insights into your spending.
+    </p>
 
-  <p>
-    Welcome. This simple webapp allows you to upload you statement in the form of of an excel file and view insights into your spending.
-  </p>
-
-  <button onclick="window.location.href='/inputForm'">
-    Analyze New Statement
-  </button>
-
-  <button onclick="window.location.href='/insightSelection'">
-    View My Insights
-  </button>
+    <div class = "action-btns">
+      <button class="action-btn" onclick="window.location.href='/inputForm'">
+        Add New Statement
+      </button>
+      <button class="action-btn" onclick="window.location.href='/insightSelection'">
+        View My Insights
+      </button>
+    </div>
+  </div>
 </body>
 
 </html>

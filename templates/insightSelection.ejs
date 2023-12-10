@@ -1,47 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-	<meta charset="utf-8" />
-	<title>Insight Selection</title>
+  <meta charset="utf-8" />
+  <title>Insight Selection</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script>
+    function toggleMonthSelection() {
+      var monthDropdown = document.getElementById("month");
+      var choice = document.querySelector('input[name="choice"]:checked').value;
+
+      // Toggle the visibility of the month dropdown based on the user's choice
+      monthDropdown.style.display = (choice === "month") ? "block" : "none";
+
+      // Enable/disable the submit button based on form completeness
+      var email = document.getElementById("email").value.trim();
+      var submitButton = document.getElementById("submitButton");
+      submitButton.disabled = (email === "" || (choice === "month" && monthDropdown.value === ""));
+    }
+
+    function validateForm() {
+      var email = document.getElementById("email").value.trim();
+      return email !== "";
+    }
+  </script>
 </head>
 
 <body>
-	<h1>Login and Select how you would like to view your insights</h1>
+  <div class="container">
+    <h1>Get Your Insights</h1>
 
-  <form id = "myForm" action="/insightSelection" method="post">
-    <label>Whats your email address? <input type="email" name="email" placeholder="example@notreal.com"></label>
+    <form id="myForm" action="/insightSelection" method="post" onsubmit="return validateForm()">
+      <label for="email">What's the email address associacted with your data? <input type="email" name="email" id="email" placeholder="example@notreal.com" oninput="toggleMonthSelection()" required></label>
 
-    <br>
+      <br>
 
-    <label for="month">Select Month (Only if you are choosing "By Month"):</label>
-    <select id="month" name="month">
-      <option value="January">January</option>
-      <option value="February">February</option>
-      <option value="March">March</option>
-      <option value="April">April</option>
-      <option value="May">May</option>
-      <option value="June">June</option>
-      <option value="July">July</option>
-      <option value="August">August</option>
-      <option value="September">September</option>
-      <option value="October">October</option>
-      <option value="November">November</option>
-      <option value="December">December</option>
-    </select>
+      <p> How would you like to view your insights?</p>
 
-    <br>
+      <label>
+        <input type="radio" name="choice" value="month" onclick="toggleMonthSelection()"> By Month
+      </label>
 
-    <!-- Monthly Button -->
-    <button type="submit" name="choice" value="month">By Month</button>
+      <label>
+        <input type="radio" name="choice" value="year" onclick="toggleMonthSelection()"> Whole Year
+      </label>
 
-    <!-- Yearly Button -->
-    <button type="submit" name="choice" value="year">Whole Year</button>
-  </form>
+      <select id="month" name="month" style="display: none;">
+        <option value="January">January</option>
+        <option value="February">February</option>
+        <option value="March">March</option>
+        <option value="April">April</option>
+        <option value="May">May</option>
+        <option value="June">June</option>
+        <option value="July">July</option>
+        <option value="August">August</option>
+        <option value="September">September</option>
+        <option value="October">October</option>
+        <option value="November">November</option>
+        <option value="December">December</option>
+      </select>
 
-  <hr>
-  <a href = "/"><u>HOME</u></a>
+      <br>
+
+      <input id="submitButton" type="submit" value="Submit" disabled>
+    </form>
+
+    <hr>
+    <a href="/"><u>HOME</u></a>
+  </div>
 </body>
-
 
 </html>
